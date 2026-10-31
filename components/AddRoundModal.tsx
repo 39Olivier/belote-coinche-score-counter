@@ -112,7 +112,7 @@ export const AddRoundModal: React.FC<AddRoundModalProps> = ({ onClose, onSave, t
               <select
                 value={contract}
                 onChange={(e) => setContract(Number(e.target.value))}
-                className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-lg font-bold text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full bg-[#0c0c16] border border-solid border-slate-700 rounded-xl p-3 text-[44px] font-bold text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 {contracts.map(c => (
                   <option key={c} value={c}>{c === 500 ? 'Générale' : c === 250 ? 'Capot' : c}</option>
@@ -121,11 +121,11 @@ export const AddRoundModal: React.FC<AddRoundModalProps> = ({ onClose, onSave, t
             </section>
             
             <section className="flex flex-col justify-center gap-2 pt-6">
-              <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-slate-300">
+              <label className="flex items-center gap-2 cursor-pointer text-[23px] font-semibold text-[#ed1414]">
                 <input type="checkbox" checked={checkedOff} onChange={e => { setCheckedOff(e.target.checked); if(e.target.checked) setOverridden(false); }} className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-indigo-500" />
                 Coinché (x2)
               </label>
-              <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-slate-300">
+              <label className="flex items-center gap-2 cursor-pointer text-[22px] font-semibold text-[#ff00e1]">
                 <input type="checkbox" checked={overridden} onChange={e => { setOverridden(e.target.checked); if(e.target.checked) setCheckedOff(false); }} className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-red-500" />
                 Surcoinché (x4)
               </label>

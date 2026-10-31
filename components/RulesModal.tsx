@@ -25,7 +25,7 @@ export const RulesModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                 <li><strong>Belote-Rebelote :</strong> Le bonus de 20 points (pour le Roi et la Dame d'atout) n'est pas géré automatiquement. Pensez à l'inclure dans les points que vous saisissez manuellement pour l'équipe concernée.</li>
                                 <li><strong>Capot (250 points) :</strong> Si l'équipe preneuse réussit (remporte tous les plis), elle marque 250 points. Si elle chute, l'équipe adverse marque 250 points.</li>
                                 <li><strong>Générale (500 points) :</strong> Si un joueur réussit seul à remporter tous les plis, son équipe marque 500 points. Si il chute, l'équipe adverse marque 500 points.</li>
-                                <li><strong>Voir "Valeur Cartes" pour le comptage des points, notamment Sans Atout et Tout Atout</li>
+                                <li><strong>Voir "Valeur Cartes" :</strong> pour le comptage des points, notamment Sans Atout et Tout Atout.</li>
                             </ul>
                         </div>
                         <p className="text-center text-slate-400 pt-4">Cette application sert d'aide au comptage. Les règles peuvent varier, adaptez la saisie à vos habitudes de jeu !</p>

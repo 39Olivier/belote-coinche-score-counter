@@ -1,5 +1,6 @@
 {
   "name": "Belote Coinchée Score Counter",
   "description": "A sleek and intuitive score counter for the card game Belote Coinchée. Easily track rounds, bids, and totals for two teams...",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": []
 }
