@@ -1,14 +1,16 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Team, Round, NewRoundData } from './types';
+import { Team, Round, NewRoundData, GameHistoryItem } from './types';
 import { AddRoundModal } from './components/AddRoundModal';
 import { Scoreboard } from './components/Scoreboard';
 import { Header } from './components/Header';
 import { SetupGame } from './components/SetupGame';
-import { PlusCircleIcon, InformationCircleIcon, BookOpenIcon } from './components/icons/Icons';
+import { PlusCircleIcon, ShareIcon } from './components/icons/Icons';
 import { ScoreChart } from './components/ScoreChart';
 import { Belotin3DModal } from './components/Belotin3DModal';
 import { InfoGuideModal } from './components/InfoGuideModal';
+import { GameHistoryModal } from './components/GameHistoryModal';
+import { playButtonClick, playRoundSuccess, playVictoryCelebration, stopVictoryCelebration } from './utils/audio';
 
 const App: React.FC = () => {
   const [rounds, setRounds] = useState<Round[]>([]);
@@ -17,8 +19,33 @@ const App: React.FC = () => {
   const [infoModalTab, setInfoModalTab] = useState<'cards' | 'rules' | null>(null);
   const [isBelotinModalOpen, setIsBelotinModalOpen] = useState<boolean>(true);
   const [isNewGameModalOpen, setIsNewGameModalOpen] = useState<boolean>(false);
+  const [isSetupModalOpen, setIsSetupModalOpen] = useState<boolean>(false);
   const [teamNames, setTeamNames] = useState<{ nous: string; eux: string } | null>(null);
   const [editingRound, setEditingRound] = useState<Round | null>(null);
+  const [gameHistory, setGameHistory] = useState<GameHistoryItem[]>([]);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
+  const [victoryShareCopied, setVictoryShareCopied] = useState<boolean>(false);
+  const [savedGameId, setSavedGameId] = useState<string | null>(null);
+
+  // Retour sonore léger sur tous les clics interactifs
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest('button, [role="button"], input[type="radio"], input[type="checkbox"]')) {
+        playButtonClick();
+      }
+    };
+    window.addEventListener('click', handleGlobalClick, { capture: true });
+    return () => window.removeEventListener('click', handleGlobalClick, { capture: true });
+  }, []);
+  const [targetScore, setTargetScore] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('beloteTargetScore');
+      return saved ? parseInt(saved, 10) || 1000 : 1000;
+    } catch {
+      return 1000;
+    }
+  });
 
   const handleCloseBelotin = useCallback(() => {
     setIsBelotinModalOpen(false);
@@ -49,10 +76,22 @@ const App: React.FC = () => {
       const savedTeamNames = localStorage.getItem('beloteTeamNames');
       if (savedTeamNames) setTeamNames(JSON.parse(savedTeamNames));
 
+      const savedTargetScore = localStorage.getItem('beloteTargetScore');
+      if (savedTargetScore) {
+        const parsed = parseInt(savedTargetScore, 10);
+        if (!isNaN(parsed) && parsed > 0) setTargetScore(parsed);
+      }
+
       const savedRounds = localStorage.getItem('beloteRounds');
       if (savedRounds) {
         const parsed = JSON.parse(savedRounds);
         if (Array.isArray(parsed)) setRounds(parsed);
+      }
+
+      const savedHistory = localStorage.getItem('beloteGameHistory');
+      if (savedHistory) {
+        const parsedHistory = JSON.parse(savedHistory);
+        if (Array.isArray(parsedHistory)) setGameHistory(parsedHistory);
       }
     } catch (e) {
       console.error("Erreur lors de la récupération des données", e);
@@ -129,42 +168,118 @@ const App: React.FC = () => {
       };
       setRounds(prev => [newRound, ...prev]);
     }
+    playRoundSuccess();
     setIsModalOpen(false);
     setEditingRound(null);
   };
   
+  const saveGameToHistory = useCallback((winningTeam: Team) => {
+    if (!teamNames || rounds.length === 0) return;
+    const now = new Date();
+    const formattedDate = new Intl.DateTimeFormat('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(now);
+
+    const winningName = winningTeam === Team.Nous ? teamNames.nous : teamNames.eux;
+    const gameId = `game_${Date.now()}`;
+
+    const newGame: GameHistoryItem = {
+      id: gameId,
+      date: now.toISOString(),
+      formattedDate,
+      teamNous: teamNames.nous,
+      teamEux: teamNames.eux,
+      scoreNous: totals.nous,
+      scoreEux: totals.eux,
+      winner: winningTeam,
+      winnerName: winningName,
+      totalRounds: rounds.length,
+      targetScore,
+    };
+
+    setGameHistory(prev => {
+      const exists = prev.some(g => 
+        g.teamNous === newGame.teamNous && 
+        g.teamEux === newGame.teamEux && 
+        g.scoreNous === newGame.scoreNous && 
+        g.scoreEux === newGame.scoreEux && 
+        Math.abs(new Date(g.date).getTime() - now.getTime()) < 60000
+      );
+      if (exists) return prev;
+      const updated = [newGame, ...prev];
+      localStorage.setItem('beloteGameHistory', JSON.stringify(updated));
+      return updated;
+    });
+    setSavedGameId(gameId);
+  }, [teamNames, rounds.length, totals.nous, totals.eux, targetScore]);
+
+  const handleDeleteHistoryGame = useCallback((id: string) => {
+    setGameHistory(prev => {
+      const updated = prev.filter(g => g.id !== id);
+      localStorage.setItem('beloteGameHistory', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const handleClearHistory = useCallback(() => {
+    setGameHistory([]);
+    localStorage.removeItem('beloteGameHistory');
+  }, []);
+
   const handleNewGame = () => {
     setIsNewGameModalOpen(true);
   };
 
   const handleConfirmResetScores = () => {
+    stopVictoryCelebration();
     setRounds([]);
     localStorage.removeItem('beloteRounds');
+    setSavedGameId(null);
     setIsNewGameModalOpen(false);
   };
 
   const handleConfirmResetAll = () => {
+    stopVictoryCelebration();
     setRounds([]);
     setTeamNames(null);
     localStorage.removeItem('beloteRounds');
     localStorage.removeItem('beloteTeamNames');
+    localStorage.removeItem('beloteTargetScore');
+    setSavedGameId(null);
     setIsNewGameModalOpen(false);
   };
 
-  const handleStartGame = (names: { nous: string; eux: string }) => {
+  const handleStartGame = (names: { nous: string; eux: string }, score: number = 1000) => {
+    stopVictoryCelebration();
     setTeamNames(names);
+    setTargetScore(score);
+    setIsSetupModalOpen(false);
     setRounds([]);
+    setSavedGameId(null);
     localStorage.setItem('beloteTeamNames', JSON.stringify(names));
+    localStorage.setItem('beloteTargetScore', score.toString());
     localStorage.removeItem('beloteRounds');
     setIsBelotinModalOpen(true);
   };
 
   const winner = useMemo(() => {
-    const threshold = 1000;
+    const threshold = targetScore || 1000;
     if (totals.nous >= threshold && totals.nous > totals.eux) return Team.Nous;
     if (totals.eux >= threshold && totals.eux > totals.nous) return Team.Eux;
     return null;
-  }, [totals]);
+  }, [totals, targetScore]);
+
+  // Sauvegarde automatique lorsque la partie est remportée + célébration sonore (fanfare & applaudissements)
+  useEffect(() => {
+    if (winner && !savedGameId && rounds.length > 0) {
+      saveGameToHistory(winner);
+      playVictoryCelebration();
+    }
+  }, [winner, savedGameId, rounds.length, saveGameToHistory]);
 
   const nextStepLabel =
     launchStep === 'cards'
@@ -175,10 +290,15 @@ const App: React.FC = () => {
 
   const onNextStep = launchStep === 'cards' || launchStep === 'rules' ? handleInfoNext : undefined;
 
-  if (!teamNames) {
+  if (!teamNames || isSetupModalOpen) {
     return (
       <>
-        <SetupGame onStartGame={handleStartGame} />
+        <SetupGame 
+          onStartGame={handleStartGame} 
+          onOpenHistory={() => setIsHistoryModalOpen(true)}
+          historyCount={gameHistory.length}
+          onCancel={teamNames ? () => setIsSetupModalOpen(false) : undefined}
+        />
         {infoModalTab && (
           <InfoGuideModal
             initialTab={infoModalTab}
@@ -194,18 +314,55 @@ const App: React.FC = () => {
             title="Lancement du Belotin"
           />
         )}
+        <GameHistoryModal
+          isOpen={isHistoryModalOpen}
+          onClose={() => setIsHistoryModalOpen(false)}
+          history={gameHistory}
+          onDeleteGame={handleDeleteHistoryGame}
+          onClearHistory={handleClearHistory}
+        />
       </>
     );
   }
 
   const winnerName = winner ? (winner === Team.Nous ? teamNames.nous : teamNames.eux) : null;
 
+  const handleShareVictory = async () => {
+    if (!teamNames || !winnerName) return;
+    const shareUrl = window.location.href;
+    const shareTitle = `Victoire de ${winnerName} à la Belote Coinchée !`;
+    const shareText = `🏆 Victoire de ${winnerName} ! Score final : ${teamNames.nous} ${totals.nous} - ${totals.eux} ${teamNames.eux} (${rounds.length} tour${rounds.length > 1 ? 's' : ''}, partie en ${targetScore.toLocaleString('fr-FR')} pts).`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: `${shareText}\n`,
+          url: shareUrl,
+        });
+        return;
+      } catch (err) {
+        // Annulé par l'utilisateur ou non supporté
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+      setVictoryShareCopied(true);
+      setTimeout(() => setVictoryShareCopied(false), 2500);
+    } catch {
+      window.prompt('Copiez le texte pour le partager :', `${shareText}\n${shareUrl}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 text-gray-200 font-sans p-4 sm:p-6 lg:p-8 selection:bg-indigo-500/30">
       <div className="max-w-4xl mx-auto">
         <Header 
           onNewGame={handleNewGame} 
-          onOpenBelotin={() => setIsBelotinModalOpen(true)}
+          onOpenInfo={() => { setLaunchStep('done'); setInfoModalTab('cards'); }}
+          onOpenHistory={() => setIsHistoryModalOpen(true)}
+          historyCount={gameHistory.length}
         />
 
         <main>
@@ -214,60 +371,53 @@ const App: React.FC = () => {
             rounds={rounds} 
             winner={winner} 
             teamNames={teamNames}
+            targetScore={targetScore}
+            onEditTargetScore={() => setIsSetupModalOpen(true)}
             onDeleteRound={(id) => setRounds(prev => prev.filter(r => r.id !== id))}
             onStartEdit={(r) => { setEditingRound(r); setIsModalOpen(true); }}
+            onAddRound={() => setIsModalOpen(true)}
+            winnerBanner={
+              winnerName ? (
+                <div className="text-center p-6 bg-green-900/40 border-2 border-green-500 rounded-2xl shadow-[0_0_25px_rgba(34,197,94,0.25)]">
+                  <h2 className="text-3xl sm:text-4xl font-black text-green-300">🏆 {winnerName} GAGNE !</h2>
+                  <p className="mt-2 text-green-200/80 font-medium text-sm sm:text-base">
+                    Félicitations pour cette belle partie en {targetScore.toLocaleString('fr-FR')} points.
+                  </p>
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+                    <span className="text-xs bg-green-950/80 text-green-300 px-3 py-1.5 rounded-full border border-green-500/50 font-semibold shadow">
+                      ✓ Sauvegardée dans l'historique
+                    </span>
+                    <button
+                      onClick={handleShareVictory}
+                      className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center gap-1.5 border border-emerald-400/40"
+                      title="Partager votre score sur les réseaux sociaux"
+                    >
+                      <ShareIcon className="w-4 h-4" />
+                      <span>{victoryShareCopied ? 'Score copié !' : 'Partager le score'}</span>
+                    </button>
+                    <button
+                      onClick={() => setIsHistoryModalOpen(true)}
+                      className="px-4 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black rounded-xl text-xs sm:text-sm shadow-md transition active:scale-95"
+                    >
+                      Voir l'historique
+                    </button>
+                    <button
+                      onClick={handleNewGame}
+                      className="px-4 py-1.5 bg-red-700 hover:bg-red-600 text-white font-black rounded-xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center gap-1.5"
+                      title="Démarrer une nouvelle partie"
+                    >
+                      <span>Nouvelle partie</span>
+                    </button>
+                  </div>
+                </div>
+              ) : undefined
+            }
           />
 
-          {winnerName && (
-             <div className="mt-8 text-center p-8 bg-green-900/40 border-2 border-green-500 rounded-2xl shadow-[0_0_30px_rgba(34,197,94,0.3)] animate-bounce">
-                <h2 className="text-4xl font-black text-green-300">🏆 {winnerName} GAGNE !</h2>
-                <p className="mt-2 text-green-200/80 font-medium">Félicitations pour cette belle partie.</p>
-             </div>
-          )}
-
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-             <button
-              onClick={() => setIsModalOpen(true)}
-              disabled={!!winner}
-              className="group flex items-center gap-3 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <PlusCircleIcon className="w-6 h-6 group-hover:rotate-90 transition-transform" />
-              Ajouter un tour
-            </button>
-             <button
-              onClick={() => { setLaunchStep('done'); setInfoModalTab('cards'); }}
-              className="flex items-center gap-2 px-6 py-4 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl shadow-lg transition-all"
-            >
-              <InformationCircleIcon className="w-6 h-6" />
-              <span className="hidden sm:inline">Valeur cartes</span>
-            </button>
-            <button
-              onClick={() => { setLaunchStep('done'); setInfoModalTab('rules'); }}
-              className="flex items-center gap-2 px-6 py-4 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl shadow-lg transition-all"
-            >
-              <BookOpenIcon className="w-6 h-6" />
-              <span className="hidden sm:inline">Règles</span>
-            </button>
-          </div>
-
-          <div className="mt-10">
+          <div className="mt-8 pb-12">
             <ScoreChart rounds={rounds} teamNames={teamNames} />
           </div>
         </main>
-
-        <footer className="text-center mt-16 pb-8 text-slate-500 text-sm font-medium tracking-wide flex flex-col items-center gap-2">
-          <div className="flex items-center gap-2.5 text-slate-300 text-xs font-semibold">
-            <img
-              src="/assets/aistudio/IMG_20230902_094732_3_345663aa.jpg"
-              alt="Olivier Fontaine"
-              className="w-8 h-8 rounded-full object-cover border-2 border-indigo-400 shadow-md"
-            />
-            <span>Développée par <strong className="text-white">Olivier Fontaine</strong></span>
-          </div>
-          <p className="text-[#8b6464] border border-[#ebebe5] bg-[#000000] inline-block px-4 py-1.5 rounded">
-            © Olivier Fontaine - Belote Coinchée V1.2 - 31/10/2026
-          </p>
-        </footer>
       </div>
 
       {isModalOpen && (
@@ -310,29 +460,54 @@ const App: React.FC = () => {
             <p className="text-slate-300 text-sm leading-relaxed">
               Voulez-vous commencer une nouvelle partie ? Tous les scores du tableau seront effacés.
             </p>
-            <div className="flex flex-col sm:flex-row gap-2 pt-2 justify-center">
+            <div className="flex flex-col sm:flex-row gap-2 pt-2 justify-center flex-wrap">
               <button
                 onClick={() => setIsNewGameModalOpen(false)}
                 className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold rounded-xl text-sm transition"
               >
                 Annuler
               </button>
+              {rounds.length > 0 && !savedGameId && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentLeader = totals.nous >= totals.eux ? Team.Nous : Team.Eux;
+                    saveGameToHistory(currentLeader);
+                  }}
+                  className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg active:scale-95"
+                >
+                  Sauvegarder dans les stats
+                </button>
+              )}
               <button
                 onClick={handleConfirmResetScores}
-                className="px-4 py-2.5 bg-red-800 hover:bg-red-700 text-white font-bold rounded-xl text-sm transition shadow-lg active:scale-95"
+                className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-semibold rounded-xl text-sm transition shadow-sm active:scale-95"
+                title="Conserver les mêmes joueurs et le même objectif de score"
               >
-                Effacer les scores
+                Recommencer (mêmes joueurs)
               </button>
               <button
-                onClick={handleConfirmResetAll}
-                className="px-4 py-2.5 bg-indigo-700 hover:bg-indigo-600 text-white font-semibold rounded-xl text-sm transition active:scale-95"
+                onClick={() => {
+                  setIsNewGameModalOpen(false);
+                  setIsSetupModalOpen(true);
+                }}
+                className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm transition shadow-lg active:scale-95"
+                title="Modifier les joueurs et l'objectif de score"
               >
-                Changer les joueurs
+                Configurer (joueurs & objectif)
               </button>
             </div>
           </div>
         </div>
       )}
+
+      <GameHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        history={gameHistory}
+        onDeleteGame={handleDeleteHistoryGame}
+        onClearHistory={handleClearHistory}
+      />
     </div>
   );
 };

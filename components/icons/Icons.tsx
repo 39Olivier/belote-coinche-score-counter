@@ -81,3 +81,15 @@ export const ChartLineIcon: React.FC<IconProps> = (props) => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
   </svg>
 );
+
+export const TrophyIcon: React.FC<IconProps> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.504-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.003 0H9.497m5.003 0A5.25 5.25 0 0 0 18 9V4.5a.75.75 0 0 0-.75-.75h-10.5a.75.75 0 0 0-.75.75V9a5.25 5.25 0 0 0 3.497 4.875M18 6.75h2.25A2.25 2.25 0 0 1 22.5 9c0 1.242-1.008 2.25-2.25 2.25H18M6 6.75H3.75A2.25 2.25 0 0 0 1.5 9c0 1.242 1.008 2.25 2.25 2.25H6" />
+  </svg>
+);
+
+export const ShareIcon: React.FC<IconProps> = (props) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5" {...props}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
+  </svg>
+);

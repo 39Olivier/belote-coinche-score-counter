@@ -37,3 +37,17 @@ export interface NewRoundData {
   checkedOff: boolean;
   overridden: boolean;
 }
+
+export interface GameHistoryItem {
+  id: string;
+  date: string;
+  formattedDate: string;
+  teamNous: string;
+  teamEux: string;
+  scoreNous: number;
+  scoreEux: number;
+  winner: Team;
+  winnerName: string;
+  totalRounds: number;
+  targetScore?: number;
+}

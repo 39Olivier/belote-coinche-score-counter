@@ -34,12 +34,10 @@ export const AddRoundModal: React.FC<AddRoundModalProps> = ({ onClose, onSave, t
     }
   }, [roundToEdit]);
 
-  const isSpecial = contract === 250 || contract === 500;
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (scoreMade === '') {
-      setError("Veuillez saisir les points réalisés.");
+      setError("Veuillez sélectionner si le contrat est RÉUSSI ou CHUTÉ.");
       return;
     }
     setError('');
@@ -64,93 +62,134 @@ export const AddRoundModal: React.FC<AddRoundModalProps> = ({ onClose, onSave, t
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[85vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[85vh] overflow-y-auto">
           {/* Qui a pris */}
           <section>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Annonceur</label>
-            <div className="grid grid-cols-2 gap-3">
-              {[Team.Nous, Team.Eux].map(t => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setBidder(t)}
-                  className={`py-3 rounded-xl font-bold transition-all border-2 ${
-                    bidder === t 
-                      ? (t === Team.Nous ? 'bg-cyan-600/20 border-cyan-500 text-cyan-300' : 'bg-amber-600/20 border-amber-500 text-amber-300')
-                      : 'bg-slate-700 border-transparent text-slate-400'
-                  }`}
-                >
-                  {t === Team.Nous ? teamNames.nous : teamNames.eux}
-                </button>
-              ))}
+            <div className="grid grid-cols-2 gap-3 py-2 px-1 items-center">
+              {[Team.Nous, Team.Eux].map(t => {
+                const isSelected = bidder === t;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setBidder(t)}
+                    className={`py-3.5 rounded-xl transition-all duration-200 border-2 active:scale-95 ${
+                      isSelected 
+                        ? 'bg-yellow-400 border-yellow-300 text-slate-950 font-black text-xl shadow-[0_0_25px_rgba(250,204,21,0.75)] ring-2 ring-yellow-400/60 scale-[1.2] relative z-20'
+                        : 'bg-slate-700/80 border-transparent text-slate-400 hover:bg-slate-700 hover:text-slate-200 font-bold'
+                    }`}
+                  >
+                    {t === Team.Nous ? teamNames.nous : teamNames.eux}
+                  </button>
+                );
+              })}
             </div>
           </section>
 
           {/* Atout */}
           <section>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Atout</label>
-            <div className="grid grid-cols-6 gap-2">
-              {Object.values(Suit).map(s => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setSuit(s)}
-                  className={`p-2 rounded-lg text-xl border-2 transition-all ${
-                    suit === s ? 'bg-indigo-600/20 border-indigo-500 scale-110' : 'bg-slate-700 border-transparent hover:bg-slate-600'
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
+            <div className="grid grid-cols-6 gap-2 py-3 px-1 items-center">
+              {Object.values(Suit).map(s => {
+                const isSelected = suit === s;
+                const isRedSuit = s === Suit.Heart || s === Suit.Diamond;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setSuit(s)}
+                    className={`p-2 rounded-xl text-xl font-bold border-2 transition-all duration-200 active:scale-95 ${
+                      isSelected
+                        ? `bg-yellow-400 border-yellow-300 ${isRedSuit ? 'text-red-600' : 'text-slate-950'} shadow-[0_0_25px_rgba(250,204,21,0.75)] ring-2 ring-yellow-400/60 scale-[1.75] relative z-20 text-2xl font-black`
+                        : 'bg-slate-700 border-transparent hover:bg-slate-600 text-slate-200'
+                    }`}
+                  >
+                    {s}
+                  </button>
+                );
+              })}
             </div>
           </section>
 
           {/* Contrat & Multiplicateurs */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 items-center">
             <section>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 block">Contrat</label>
               <select
                 value={contract}
-                onChange={(e) => setContract(Number(e.target.value))}
-                className="w-full bg-[#0c0c16] border border-solid border-slate-700 rounded-xl p-3 text-[44px] font-bold text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                onChange={(e) => {
+                  const newContract = Number(e.target.value);
+                  setContract(newContract);
+                  if (scoreMade !== '' && Number(scoreMade) > 0) {
+                    setScoreMade(newContract);
+                  }
+                }}
+                className="w-full bg-yellow-400 border-2 border-yellow-300 rounded-xl p-3 text-[44px] font-black text-slate-950 shadow-[0_0_22px_rgba(250,204,21,0.65)] ring-2 ring-yellow-300/80 focus:outline-none cursor-pointer transition-all"
               >
                 {contracts.map(c => (
-                  <option key={c} value={c}>{c === 500 ? 'Générale' : c === 250 ? 'Capot' : c}</option>
+                  <option key={c} value={c} className="bg-slate-900 text-white font-bold text-xl py-1">{c === 500 ? 'Générale' : c === 250 ? 'Capot' : c}</option>
                 ))}
               </select>
             </section>
             
-            <section className="flex flex-col justify-center gap-2 pt-6">
-              <label className="flex items-center gap-2 cursor-pointer text-[23px] font-semibold text-[#ed1414]">
-                <input type="checkbox" checked={checkedOff} onChange={e => { setCheckedOff(e.target.checked); if(e.target.checked) setOverridden(false); }} className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-indigo-500" />
+            <section className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !checkedOff;
+                  setCheckedOff(next);
+                  if (next) setOverridden(false);
+                }}
+                className={`w-full py-2.5 px-3 rounded-xl font-black text-sm sm:text-base transition-all active:scale-95 border-2 ${
+                  checkedOff
+                    ? 'bg-yellow-400 border-yellow-300 text-slate-950 shadow-lg shadow-yellow-400/40 ring-2 ring-yellow-400/50 scale-[1.02]'
+                    : 'bg-slate-700/80 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white'
+                }`}
+              >
                 Coinché (x2)
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer text-[22px] font-semibold text-[#ff00e1]">
-                <input type="checkbox" checked={overridden} onChange={e => { setOverridden(e.target.checked); if(e.target.checked) setCheckedOff(false); }} className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-red-500" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !overridden;
+                  setOverridden(next);
+                  if (next) setCheckedOff(false);
+                }}
+                className={`w-full py-2.5 px-3 rounded-xl font-black text-sm sm:text-base transition-all active:scale-95 border-2 ${
+                  overridden
+                    ? 'bg-yellow-400 border-yellow-300 text-slate-950 shadow-lg shadow-yellow-400/40 ring-2 ring-yellow-400/50 scale-[1.02]'
+                    : 'bg-slate-700/80 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white'
+                }`}
+              >
                 Surcoinché (x4)
-              </label>
+              </button>
             </section>
           </div>
 
           {/* Points */}
           <section>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Points réalisés par le preneur</label>
-            {isSpecial ? (
-              <div className="grid grid-cols-2 gap-3">
-                <button type="button" onClick={() => setScoreMade(contract)} className={`py-4 rounded-xl font-bold transition-all ${scoreMade === contract ? 'bg-green-600 text-white' : 'bg-slate-700'}`}>RÉUSSI</button>
-                <button type="button" onClick={() => setScoreMade(0)} className={`py-4 rounded-xl font-bold transition-all ${scoreMade === 0 ? 'bg-red-600 text-white' : 'bg-slate-700'}`}>CHUTÉ</button>
-              </div>
-            ) : (
-              <div className="flex gap-4">
-                <input
-                  type="number"
-                  placeholder="Points preneur"
-                  value={scoreMade}
-                  onChange={(e) => setScoreMade(e.target.value === '' ? '' : Number(e.target.value))}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-2xl font-black text-center text-white focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-            )}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => { setScoreMade(contract); setError(''); }}
+                className={`py-4 rounded-xl font-black text-lg transition-all active:scale-95 border-2 ${
+                  scoreMade !== '' && Number(scoreMade) >= contract
+                    ? 'bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-600/30 ring-2 ring-emerald-400/50 scale-[1.02]'
+                    : 'bg-slate-700/80 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white'
+                }`}
+              >
+                RÉUSSI
+              </button>
+              <button
+                type="button"
+                onClick={() => { setScoreMade(0); setError(''); }}
+                className={`py-4 rounded-xl font-black text-lg transition-all active:scale-95 border-2 ${
+                  scoreMade !== '' && Number(scoreMade) < contract
+                    ? 'bg-rose-600 border-rose-400 text-white shadow-lg shadow-rose-600/30 ring-2 ring-rose-400/50 scale-[1.02]'
+                    : 'bg-slate-700/80 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white'
+                }`}
+              >
+                CHUTÉ
+              </button>
+            </div>
           </section>
 
           {error && <p className="text-red-400 text-sm font-bold text-center animate-pulse">{error}</p>}

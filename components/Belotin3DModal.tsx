@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { XMarkIcon, ArrowPathIcon } from './icons/Icons';
+import { XMarkIcon } from './icons/Icons';
 
 interface Belotin3DModalProps {
   isOpen: boolean;
@@ -470,17 +470,20 @@ export const Belotin3DModal: React.FC<Belotin3DModalProps> = ({ isOpen, onClose,
           <XMarkIcon />
         </button>
 
-        {/* Header */}
-        <div className="text-center pt-6 px-4">
-          <span className="text-xs font-bold tracking-widest text-indigo-400 uppercase">
-            🎲 Tradition Belote Coinchée
-          </span>
-          <h2 id="belotin-title" className="text-2xl font-black text-slate-100 mt-1">
-            {title}
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Le dé en bois tourne pour désigner l&apos;atout ou le donneur !
-          </p>
+        {/* Header with Title */}
+        <div className="w-full pt-5 px-10 pb-1 flex flex-col items-center justify-center text-center">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <span className="text-gray-300 text-lg">♠</span>
+            <span className="text-red-500 text-lg">♥</span>
+            <span className="text-red-500 text-lg">♦</span>
+            <span className="text-gray-300 text-lg">♣</span>
+          </div>
+          <h1 
+            id="belotin-title"
+            className="text-[20px] font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-rose-300 to-amber-300 drop-shadow-[0_0_14px_rgba(239,68,68,0.5)] animate-pulse inline-block hover:scale-[1.03] transition-all duration-300 cursor-default"
+          >
+            Belotin Compteur pour Coinche
+          </h1>
         </div>
 
         {/* 3D WebGL Canvas Viewport */}
@@ -494,49 +497,17 @@ export const Belotin3DModal: React.FC<Belotin3DModalProps> = ({ isOpen, onClose,
           <div className="absolute inset-x-8 bottom-6 h-12 bg-emerald-950/40 rounded-full blur-xl -z-10 pointer-events-none" />
         </div>
 
-        {/* Result Announcement or Rolling State */}
-        <div className="w-full px-6 pb-6 space-y-4 text-center">
-          <div className="min-h-[44px] flex items-center justify-center">
-            {isRolling ? (
-              <div className="flex items-center gap-2 text-indigo-300 text-sm font-semibold animate-pulse">
-                <ArrowPathIcon className="w-4 h-4 animate-spin text-indigo-400" />
-                <span>Le Belotin roule sur le tapis...</span>
-              </div>
-            ) : resultFace ? (
-              <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-slate-800/90 border border-slate-600 rounded-xl shadow-lg">
-                <span className="text-2xl font-bold" style={{ color: resultFace.color }}>
-                  {resultFace.symbol}
-                </span>
-                <div className="text-left">
-                  <span className="block text-[10px] text-slate-400 uppercase font-medium">
-                    Atout désigné
-                  </span>
-                  <span className="text-base font-extrabold text-white">
-                    {resultFace.name}
-                  </span>
-                </div>
-              </div>
-            ) : null}
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex items-center justify-center gap-3 pt-1">
-            <button
-              onClick={rollDice}
-              disabled={isRolling}
-              className="flex items-center gap-2 px-5 py-2.5 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white font-semibold rounded-xl text-xs sm:text-sm shadow transition active:scale-95"
-            >
-              <ArrowPathIcon className={`w-4 h-4 ${isRolling ? 'animate-spin' : ''}`} />
-              <span>Relancer le dé</span>
-            </button>
-
-            <button
-              onClick={onClose}
-              className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs sm:text-sm shadow-lg transition active:scale-95"
-            >
-              <span>Continuer</span>
-            </button>
-          </div>
+        {/* Action button: Continuer */}
+        <div className="w-full px-6 pb-5 pt-2 text-center flex flex-col items-center gap-2">
+          <button
+            onClick={onClose}
+            className="w-full sm:w-auto min-w-[200px] px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-base rounded-xl shadow-xl transition active:scale-95"
+          >
+            Continuer
+          </button>
+          <span className="text-[11px] font-medium text-slate-500 tracking-wider">
+            ©JuraBrain
+          </span>
         </div>
       </div>
     </div>

@@ -15,10 +15,35 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
   onNextStep
 }) => {
   const [activeTab, setActiveTab] = useState<'cards' | 'rules' | 'author'>(initialTab);
+  const [shareCopied, setShareCopied] = useState(false);
 
   useEffect(() => {
     setActiveTab(initialTab);
   }, [initialTab]);
+
+  const handleShareApp = async () => {
+    const shareUrl = 'https://belote-coinche-score-counter.netlify.app';
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Belotin Compteur pour Belote Coinchée !',
+          text: 'Découvrez cette super appli pour compter les points de Belote Coinchée et le Belotin !',
+          url: shareUrl,
+        });
+        return;
+      } catch (err) {
+        // Dialogue fermé
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 3000);
+    } catch (err) {
+      window.prompt('Copiez le lien pour partager :', shareUrl);
+    }
+  };
 
   const cardValues = {
     headers: ['7', '8', '9', '10', 'V', 'D', 'R', 'AS'],
@@ -35,26 +60,14 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
       className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-[70] animate-fade-in-fast"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="info-guide-title"
+      aria-label="Guide et Règles"
     >
       <div className="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-3xl border border-slate-700 relative overflow-hidden flex flex-col max-h-[92vh]">
         {/* Top Header with Tabs */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-5 border-b border-slate-700 bg-slate-800/95 gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">📚</span>
-            <div>
-              <h2 id="info-guide-title" className="text-lg sm:text-xl font-bold text-slate-100">
-                Belote Coinchée - Guide & Informations
-              </h2>
-              <p className="text-xs text-slate-400">
-                Application développée par Olivier Fontaine
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+        <div className="flex justify-between items-center p-3 sm:p-4 border-b border-slate-700 bg-slate-800/95 gap-3">
+          <div className="flex items-center gap-2 w-full justify-between flex-wrap">
             {/* Tab switchers */}
-            <div className="flex items-center p-1 bg-slate-900 rounded-xl border border-slate-700 text-xs font-semibold">
+            <div className="flex items-center p-1 bg-slate-900 rounded-xl border border-slate-700 text-xs font-semibold flex-wrap gap-0.5">
               <button
                 type="button"
                 onClick={() => setActiveTab('cards')}
@@ -64,7 +77,7 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                🃏 Valeur Cartes
+                Valeur Cartes
               </button>
               <button
                 type="button"
@@ -75,7 +88,7 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                📖 Règles
+                Règles
               </button>
               <button
                 type="button"
@@ -86,8 +99,26 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                👤 Créateur
+                Créateur
               </button>
+              <a
+                href="https://play.google.com/store/apps/details?id=com.gampark.belote&hl=fr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2.5 sm:px-3 py-1.5 rounded-lg transition-all text-emerald-400 hover:text-emerald-300 hover:bg-slate-800 flex items-center gap-1.5 whitespace-nowrap"
+                title="Jouer à la Belote en ligne avec vos amis sur Google Play"
+              >
+                <span>Jouer en ligne ↗</span>
+              </a>
+              <a
+                href="https://www.jeujura.fr/accessoires-pour-jeux/9026-de-belote-de-d-atout-en-bois.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2.5 sm:px-3 py-1.5 rounded-lg transition-all text-amber-400 hover:text-amber-300 hover:bg-slate-800 flex items-center gap-1.5 whitespace-nowrap"
+                title="Acheter un dé Belotin en bois fabriqué dans le Jura sur JeuJura"
+              >
+                <span>Belotin en bois ↗</span>
+              </a>
             </div>
 
             <button
@@ -105,18 +136,11 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
           {/* TAB 1: VALEUR DES CARTES */}
           {activeTab === 'cards' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-cyan-400">
-                  Barème officiel des points par carte
-                </h3>
-                <span className="text-xs text-slate-400">Dix de der : +10 pts</span>
-              </div>
-
               <div className="overflow-x-auto rounded-xl border border-slate-700 shadow-lg">
                 <table className="min-w-full text-center text-white">
                   <thead className="bg-slate-900/90 text-xs text-slate-300 uppercase">
                     <tr>
-                      <th className="p-3 border-r border-slate-700 font-bold text-left pl-4">Type de pli</th>
+                      <th className="px-2 py-2 border-r border-slate-700 font-bold text-left w-px whitespace-nowrap">Carte</th>
                       {cardValues.headers.map((h) => (
                         <th key={h} className="p-3 border-r border-slate-700 font-black text-sm last:border-r-0">
                           {h}
@@ -130,7 +154,7 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
                         key={row.suit}
                         className={idx % 2 === 0 ? 'bg-slate-800/70 hover:bg-slate-700/50' : 'bg-slate-800/40 hover:bg-slate-700/50'}
                       >
-                        <td className="p-3 border-r border-slate-700 text-left pl-4 font-bold text-xs uppercase tracking-wider text-indigo-300 whitespace-nowrap">
+                        <td className="px-2 py-2 border-r border-slate-700 text-left font-bold text-xs uppercase tracking-wider text-indigo-300 whitespace-nowrap w-px">
                           {row.suit}
                         </td>
                         {row.values.map((val, vIdx) => {
@@ -175,23 +199,6 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
                   </tbody>
                 </table>
               </div>
-
-              {/* Card values highlights */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs text-slate-300">
-                <div className="bg-slate-900/60 p-3.5 rounded-xl border border-slate-700/60">
-                  <span className="font-bold text-amber-400 block mb-1">⭐ Les maîtresses d&apos;Atout</span>
-                  <p className="text-slate-400">
-                    Le <strong className="text-slate-200">Valet d&apos;atout</strong> vaut <strong>20 pts</strong> et le{' '}
-                    <strong className="text-slate-200">9 d&apos;atout</strong> (le « 14 ») vaut <strong>14 pts</strong>.
-                  </p>
-                </div>
-                <div className="bg-slate-900/60 p-3.5 rounded-xl border border-slate-700/60">
-                  <span className="font-bold text-cyan-400 block mb-1">🃏 Sans Atout & Tout Atout</span>
-                  <p className="text-slate-400">
-                    À Sans Atout, l&apos;<strong className="text-slate-200">As</strong> monte à <strong>19 pts</strong>. À Tout Atout, tous les valets valent 14 pts et tous les 9 valent 9 pts.
-                  </p>
-                </div>
-              </div>
             </div>
           )}
 
@@ -200,10 +207,10 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
             <div className="space-y-4 text-xs sm:text-sm leading-relaxed text-slate-300">
               <div className="bg-slate-900/70 p-4 rounded-xl border border-slate-700/70">
                 <h3 className="text-base font-bold text-cyan-400 mb-2">
-                  1. Règle du comptage des points (Belote Coinchée)
+                  1. Comptage des points
                 </h3>
                 <p>
-                  Dans la Belote Coinchée, <strong className="text-white">seul le contrat annoncé est marqué</strong> par l&apos;équipe qui l&apos;emporte, et l&apos;équipe perdante marque <strong>zéro point</strong>.
+                  Dans la variante de Belote Coinchée en 1 000 points proposée ici, <strong className="text-white">seul le contrat annoncé est marqué</strong> par l&apos;équipe qui l&apos;emporte, et l&apos;équipe perdante marque <strong>zéro point</strong>.
                 </p>
                 <p className="mt-1.5 text-slate-400">
                   Exemple : Si vous annoncez 100 et réalisez 130 points, vous marquez <strong>100 points</strong> (et vos adversaires 0). Si vous chutez votre contrat (vous faites moins de 100), l&apos;équipe adverse encaisse les 100 points et vous marquez 0.
@@ -212,14 +219,15 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
 
               <div className="bg-slate-900/70 p-4 rounded-xl border border-slate-700/70 space-y-2">
                 <h3 className="text-base font-bold text-amber-400">
-                  2. Contrats & Multiplicateurs
+                  2. Contrats
                 </h3>
                 <ul className="list-disc list-inside space-y-1.5 pl-2 text-slate-300">
                   <li>
-                    <strong className="text-white">Contrats de 82 à 160 :</strong> Saisie normale par paliers de 10.
+                    <strong className="text-white">Contrats de 80 à 160 :</strong> Saisie normale par paliers de 10, N'oubliez pas les contrats tout atouts (TA) et sans atouts (SA).
+                    Et pour s'amuser, n'hésitez pas à coincher et surcoincher à la volée en tapant du poing sur la table ! (le dé de bois appelé belotin marque le donneur)
                   </li>
                   <li>
-                    <strong className="text-red-400">Coinché (x2) :</strong> Les points du contrat sont multipliés par 2 pour le vainqueur du coup.
+                    <strong className="text-red-400">Coinché (x2) :</strong> Les points du contrat sont multipliés par 2.
                   </li>
                   <li>
                     <strong className="text-purple-400">Surcoinché (x4) :</strong> Les points du contrat sont multipliés par 4.
@@ -255,24 +263,36 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
               <div className="bg-slate-900/80 p-6 rounded-2xl border border-slate-700/80 flex flex-col sm:flex-row items-center gap-6">
                 <img
                   src="/assets/aistudio/IMG_20230902_094732_3_345663aa.jpg"
-                  alt="Olivier Fontaine"
+                  alt="OFE"
                   className="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl object-cover border-2 border-indigo-400 shadow-2xl flex-shrink-0"
                 />
-                <div className="space-y-2">
-                  <div className="inline-block bg-indigo-900/60 text-indigo-300 text-xs font-bold px-3 py-1 rounded-full border border-indigo-700">
-                    Concepteur & Développeur
-                  </div>
-                  <h4 className="text-2xl font-black text-white">Olivier Fontaine</h4>
-                  <p className="text-sm text-slate-300 leading-relaxed">
-                    Passionné par la Belote Coinchée, cette application a été conçue pour offrir un compteur de points moderne, intuitif et complet avec graphiques d&apos;évolution, dé 3D Belotin traditionnel et mémorisation automatique des scores.
+                <div className="space-y-3">
+                  <h4 className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-amber-200 animate-pulse tracking-tight">
+                    Développé par ©JuraBrain - tout droit récservé - 2026
+                  </h4>
+
+                  <p className="text-xs sm:text-sm text-slate-300 font-medium">
+                    Contact pour suggestion, pourboire...{' '}
+                    <a
+                      href="mailto:boite151@hotmail.fr"
+                      className="text-amber-400 font-bold underline underline-offset-2 hover:text-amber-200 transition-colors cursor-pointer"
+                      title="Envoyer un e-mail à boite151@hotmail.fr"
+                    >
+                      boite151@hotmail.fr
+                    </a>
                   </p>
+
                   <div className="pt-2">
-                    <p className="text-xs font-mono text-amber-400/90 font-bold">
-                      © Olivier Fontaine - Belote Coinchée V1.2 - 31/10/2026
-                    </p>
-                    <p className="text-[11px] text-slate-400">
-                      Tous droits réservés. Reproduction et diffusion autorisées pour usage privé et associatif.
-                    </p>
+                    <button
+                      type="button"
+                      onClick={handleShareApp}
+                      className="group relative inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-sky-600 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white font-black text-xs sm:text-sm shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all duration-300 transform hover:scale-105 active:scale-95 animate-pulse"
+                      title="Partager l'application sur tous vos réseaux !"
+                    >
+                      <span className="text-base group-hover:rotate-12 transition-transform inline-block">📢</span>
+                      <span>{shareCopied ? '✓ Lien copié ! Merci du partage !' : "Partager l'appli sur tous vos réseaux !"}</span>
+                      <span className="text-amber-300 animate-bounce">✨</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -281,10 +301,7 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-slate-900/95 border-t border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span className="text-xs text-slate-400 text-center sm:text-left">
-            © Olivier Fontaine
-          </span>
+        <div className="p-4 bg-slate-900/95 border-t border-slate-700 flex items-center justify-end">
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             {onNextStep && (
               <button
