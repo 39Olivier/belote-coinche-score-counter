@@ -102,11 +102,11 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
                 Créateur
               </button>
               <a
-                href="https://play.google.com/store/apps/details?id=com.gampark.belote&hl=fr"
+                href="https://exoty.com/belote"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-2.5 sm:px-3 py-1.5 rounded-lg transition-all text-emerald-400 hover:text-emerald-300 hover:bg-slate-800 flex items-center gap-1.5 whitespace-nowrap"
-                title="Jouer à la Belote en ligne avec vos amis sur Google Play"
+                title="Jouer à la Belote & Coinche en ligne gratuitement sur Exoty"
               >
                 <span>Jouer en ligne ↗</span>
               </a>

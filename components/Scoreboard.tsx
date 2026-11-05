@@ -94,7 +94,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({ totals, rounds, winner, 
           </div>
         )}
 
-        {/* Bouton Ajouter un tour au-dessus des tours (composants LI) */}
+        {/* Bouton Ajouter une manche au-dessus des manches (composants LI) */}
         {onAddRound && !winner && (
           <div className="mb-4">
             <button
@@ -103,13 +103,13 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({ totals, rounds, winner, 
               className="group w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2.5"
             >
               <PlusCircleIcon className="w-5 h-5 group-hover:rotate-90 transition-transform" />
-              <span className="text-sm sm:text-base">Ajouter un tour</span>
+              <span className="text-sm sm:text-base">Ajouter une manche</span>
             </button>
           </div>
         )}
 
         {rounds.length === 0 ? (
-          <p className="text-center text-slate-500 py-8">Aucun tour joué pour le moment.</p>
+          <p className="text-center text-slate-500 py-8">Aucune manche jouée pour le moment.</p>
         ) : (
           <ul className="space-y-3">
             {rounds.map((round) => (

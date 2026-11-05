@@ -7,11 +7,12 @@ interface HeaderProps {
     onOpenInfo?: () => void;
     onOpenHistory?: () => void;
     historyCount?: number;
+    onExit?: () => void;
 }
 
 const SHARE_URL = 'https://belote-coinche-score-counter.netlify.app';
 
-export const Header: React.FC<HeaderProps> = ({ onNewGame, onOpenInfo, onOpenHistory, historyCount }) => {
+export const Header: React.FC<HeaderProps> = ({ onNewGame, onOpenInfo, onOpenHistory, historyCount, onExit }) => {
     const [copied, setCopied] = useState(false);
     const [soundActive, setSoundActive] = useState<boolean>(() => isAudioEnabled());
 
@@ -99,12 +100,11 @@ export const Header: React.FC<HeaderProps> = ({ onNewGame, onOpenInfo, onOpenHis
                 {onOpenInfo && (
                     <button
                         onClick={onOpenInfo}
-                        className="flex items-center gap-1.5 px-3 py-2 text-xs sm:text-sm bg-indigo-700/80 hover:bg-indigo-600 text-indigo-100 font-bold rounded-lg shadow transition-all active:scale-95 border border-indigo-500/40"
+                        className="flex items-center justify-center px-2.5 py-2 text-xs sm:text-sm bg-indigo-700/80 hover:bg-indigo-600 text-indigo-100 font-bold rounded-lg shadow transition-all active:scale-95 border border-indigo-500/40"
                         title="Règles du jeu"
                         aria-label="Règles"
                     >
-                        <InformationCircleIcon className="w-5 h-5 text-indigo-200 pointer-events-none" />
-                        <span className="hidden sm:inline">Règles</span>
+                        <InformationCircleIcon className="w-5 h-5 text-indigo-200" />
                     </button>
                 )}
 
@@ -120,6 +120,16 @@ export const Header: React.FC<HeaderProps> = ({ onNewGame, onOpenInfo, onOpenHis
                 >
                     <span>{soundActive ? '🔊' : '🔇'}</span>
                 </button>
+
+                {onExit && (
+                    <button
+                        onClick={onExit}
+                        className="flex items-center px-3 py-2 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold rounded-lg shadow transition-all active:scale-95 border border-slate-700"
+                        title="Quitter et jouer en ligne sur Exoty"
+                    >
+                        <span>Quitter</span>
+                    </button>
+                )}
 
                 <button
                     onClick={onNewGame}

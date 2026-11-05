@@ -37,7 +37,7 @@ export const AddRoundModal: React.FC<AddRoundModalProps> = ({ onClose, onSave, t
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (scoreMade === '') {
-      setError("Veuillez sélectionner si le contrat est RÉUSSI ou CHUTÉ.");
+      setError("Veuillez sélectionner si le contrat est RÉUSSI ou ÉCHOUÉ.");
       return;
     }
     setError('');
@@ -56,7 +56,7 @@ export const AddRoundModal: React.FC<AddRoundModalProps> = ({ onClose, onSave, t
     <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
       <div className="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md border border-slate-700 overflow-hidden animate-slide-in-down">
         <div className="flex justify-between items-center p-6 border-b border-slate-700 bg-slate-800/50">
-          <h2 className="text-xl font-bold text-slate-100">{roundToEdit ? 'Modifier le Tour' : 'Nouveau Tour'}</h2>
+          <h2 className="text-xl font-bold text-slate-100">{roundToEdit ? 'Modifier la Manche' : 'Nouvelle Manche'}</h2>
           <button onClick={onClose} className="p-2 hover:bg-slate-700 rounded-full transition-colors text-slate-400 hover:text-white">
             <XMarkIcon className="w-6 h-6" />
           </button>
@@ -187,7 +187,7 @@ export const AddRoundModal: React.FC<AddRoundModalProps> = ({ onClose, onSave, t
                     : 'bg-slate-700/80 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white'
                 }`}
               >
-                CHUTÉ
+                Échoué
               </button>
             </div>
           </section>

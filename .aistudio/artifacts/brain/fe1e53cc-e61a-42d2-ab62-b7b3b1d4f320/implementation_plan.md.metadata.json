@@ -1,6 +1,6 @@
 {
-  "summary":  "Plan pour la génération et le téléchargement simplifié de l'APK Android de l'application de Belote Coinchée.",
-  "updatedAt":  "2026-10-30T09:59:21.525549994Z",
-  "requestFeedback":  true,
-  "userFacing":  true
+  "summary": "Guide de localisation des textes dans les composants du projet (pourquoi Ctrl+F ne trouvait pas le texte recherché) et plan d'intégration de l'export JSON / CSV de l'historique des parties.",
+  "updatedAt": "2026-11-05T08:01:45.704446457Z",
+  "requestFeedback": true,
+  "userFacing": true
 }

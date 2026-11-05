@@ -6,8 +6,8 @@ import { Scoreboard } from './components/Scoreboard';
 import { Header } from './components/Header';
 import { SetupGame } from './components/SetupGame';
 import { PlusCircleIcon, ShareIcon } from './components/icons/Icons';
-import { ScoreChart } from './components/ScoreChart';
-import { Belotin3DModal } from './components/Belotin3DModal';
+import { WelcomeModal } from './components/WelcomeModal';
+import { ExitModal } from './components/ExitModal';
 import { InfoGuideModal } from './components/InfoGuideModal';
 import { GameHistoryModal } from './components/GameHistoryModal';
 import { playButtonClick, playRoundSuccess, playVictoryCelebration, stopVictoryCelebration } from './utils/audio';
@@ -15,6 +15,7 @@ import { playButtonClick, playRoundSuccess, playVictoryCelebration, stopVictoryC
 const App: React.FC = () => {
   const [rounds, setRounds] = useState<Round[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
   const [launchStep, setLaunchStep] = useState<'belotin' | 'cards' | 'rules' | 'done'>('belotin');
   const [infoModalTab, setInfoModalTab] = useState<'cards' | 'rules' | null>(null);
   const [isBelotinModalOpen, setIsBelotinModalOpen] = useState<boolean>(true);
@@ -135,7 +136,7 @@ const App: React.FC = () => {
     
     let roundNous = 0;
     let roundEux = 0;
-    let status = isSuccess ? "réussi" : "chuté";
+    let status = isSuccess ? "réussi" : "échoué";
 
     if (isSuccess) {
       if (bidder === Team.Nous) roundNous = baseScore;
@@ -308,10 +309,9 @@ const App: React.FC = () => {
           />
         )}
         {isBelotinModalOpen && (
-          <Belotin3DModal
+          <WelcomeModal
             isOpen={isBelotinModalOpen}
             onClose={handleCloseBelotin}
-            title="Lancement du Belotin"
           />
         )}
         <GameHistoryModal
@@ -331,7 +331,7 @@ const App: React.FC = () => {
     if (!teamNames || !winnerName) return;
     const shareUrl = window.location.href;
     const shareTitle = `Victoire de ${winnerName} à la Belote Coinchée !`;
-    const shareText = `🏆 Victoire de ${winnerName} ! Score final : ${teamNames.nous} ${totals.nous} - ${totals.eux} ${teamNames.eux} (${rounds.length} tour${rounds.length > 1 ? 's' : ''}, partie en ${targetScore.toLocaleString('fr-FR')} pts).`;
+    const shareText = `🏆 Victoire de ${winnerName} ! Score final : ${teamNames.nous} ${totals.nous} - ${totals.eux} ${teamNames.eux} (${rounds.length} manche${rounds.length > 1 ? 's' : ''}, partie en ${targetScore.toLocaleString('fr-FR')} pts).`;
 
     if (navigator.share) {
       try {
@@ -363,6 +363,7 @@ const App: React.FC = () => {
           onOpenInfo={() => { setLaunchStep('done'); setInfoModalTab('cards'); }}
           onOpenHistory={() => setIsHistoryModalOpen(true)}
           historyCount={gameHistory.length}
+          onExit={() => setIsExitModalOpen(true)}
         />
 
         <main>
@@ -379,7 +380,7 @@ const App: React.FC = () => {
             winnerBanner={
               winnerName ? (
                 <div className="text-center p-6 bg-green-900/40 border-2 border-green-500 rounded-2xl shadow-[0_0_25px_rgba(34,197,94,0.25)]">
-                  <h2 className="text-3xl sm:text-4xl font-black text-green-300">🏆 {winnerName} GAGNE !</h2>
+                  <h2 className="text-3xl sm:text-4xl font-black text-green-300">🏆 {winnerName} TRIOMPHENT !</h2>
                   <p className="mt-2 text-green-200/80 font-medium text-sm sm:text-base">
                     Félicitations pour cette belle partie en {targetScore.toLocaleString('fr-FR')} points.
                   </p>
@@ -413,10 +414,6 @@ const App: React.FC = () => {
               ) : undefined
             }
           />
-
-          <div className="mt-8 pb-12">
-            <ScoreChart rounds={rounds} teamNames={teamNames} />
-          </div>
         </main>
       </div>
 
@@ -439,12 +436,16 @@ const App: React.FC = () => {
       )}
 
       {isBelotinModalOpen && (
-        <Belotin3DModal
+        <WelcomeModal
           isOpen={isBelotinModalOpen}
           onClose={handleCloseBelotin}
-          title="Tirage du Belotin"
         />
       )}
+
+      <ExitModal
+        isOpen={isExitModalOpen}
+        onClose={() => setIsExitModalOpen(false)}
+      />
 
       {isNewGameModalOpen && (
         <div 
