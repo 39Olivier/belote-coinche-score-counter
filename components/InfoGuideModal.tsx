@@ -158,37 +158,34 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
                           {row.suit}
                         </td>
                         {row.values.map((val, vIdx) => {
-                          let cellStyle = '';
-                          
-                          if (idx === 3) {
-                            if (vIdx === 2) cellStyle = 'text-[#f0e616] text-[17px]';
-                            else if (vIdx === 3) cellStyle = 'text-[#dddd1e] text-[17px]';
-                            else if (vIdx === 4) cellStyle = 'text-[#e7de1a] text-[17px]';
-                            else if (vIdx === 5) cellStyle = 'text-[#dbea3c] text-[17px]';
-                            else if (vIdx === 6) cellStyle = 'text-[#d6de24] text-[17px]';
-                            else if (vIdx === 7) cellStyle = 'text-[#e4e416] text-[17px]';
-                          } else if (idx === 2) {
-                            if (vIdx === 3) cellStyle = 'text-[#ffffff]';
-                            else if (vIdx === 7) cellStyle = 'text-[#cce21f]';
-                          } else if (idx === 0) {
-                            if (vIdx === 3 || vIdx === 7) cellStyle = 'text-[#ffffff]';
-                          } else if (idx === 1) {
-                            if (vIdx === 2 || vIdx === 3 || vIdx === 4 || vIdx === 7) cellStyle = 'text-[#ffffff]';
+                          const isHighlighted = (idx === 2 && vIdx === 7) || (idx === 3 && vIdx >= 2 && vIdx <= 7);
+
+                          if (isHighlighted) {
+                            return (
+                              <td
+                                key={vIdx}
+                                className="p-2 sm:p-2.5 border-r border-slate-700 font-mono font-black last:border-r-0"
+                              >
+                                <span className="inline-flex items-center justify-center min-w-[30px] px-1.5 py-0.5 rounded-md text-amber-300 bg-amber-400/20 border border-amber-400 font-black text-[15px] sm:text-base animate-card-highlight shadow-[0_0_12px_rgba(250,204,21,0.6)]">
+                                  {val}
+                                </span>
+                              </td>
+                            );
                           }
 
-                          const fallbackStyle =
-                            val === '20' || val === '19' || val === '14'
+                          const standardStyle =
+                            val === '20' || val === '14'
                               ? 'text-amber-400 font-black text-base'
                               : val === '11' || val === '10'
                               ? 'text-cyan-400'
+                              : val === '0'
+                              ? 'text-slate-500'
                               : 'text-slate-300';
 
                           return (
                             <td
                               key={vIdx}
-                              className={`p-3 border-r border-slate-700 font-mono font-bold last:border-r-0 ${
-                                cellStyle || fallbackStyle
-                              }`}
+                              className={`p-3 border-r border-slate-700 font-mono font-bold last:border-r-0 ${standardStyle}`}
                             >
                               {val}
                             </td>
@@ -205,41 +202,118 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
           {/* TAB 2: RÈGLES DU JEU */}
           {activeTab === 'rules' && (
             <div className="space-y-4 text-xs sm:text-sm leading-relaxed text-slate-300">
-              <div className="bg-slate-900/70 p-4 rounded-xl border border-slate-700/70">
-                <h3 className="text-base font-bold text-cyan-400 mb-2">
+              <div className="bg-slate-900/70 p-4 rounded-xl border border-slate-700/70 space-y-3">
+                <h3 className="text-base font-bold text-cyan-400">
                   1. Comptage des points
                 </h3>
-                <p>
-                  Dans la variante de Belote Coinchée en 1 000 points proposée ici, <strong className="text-white">seul le contrat annoncé est marqué</strong> par l&apos;équipe qui l&apos;emporte, et l&apos;équipe perdante marque <strong>zéro point</strong>.
+                <p className="text-slate-200">
+                  Dans la variante de Belote Coinchée <strong className="text-[#cd5252] bg-slate-800 px-1.5 py-0.5 rounded border border-[#cd5252]/40 font-bold">SANS ANNONCES</strong> proposée ici, <strong className="text-cyan-300 font-bold">seule l&apos;enchère annoncée est marquée</strong> par l&apos;équipe gagnante, et l&apos;équipe perdante marque systématiquement <strong className="text-rose-400 font-bold">0 point</strong>.
                 </p>
-                <p className="mt-1.5 text-slate-400">
-                  Exemple : Si vous annoncez 100 et réalisez 130 points, vous marquez <strong>100 points</strong> (et vos adversaires 0). Si vous chutez votre contrat (vous faites moins de 100), l&apos;équipe adverse encaisse les 100 points et vous marquez 0.
-                </p>
+
+                {/* Encadré Exemple en exergue */}
+                <div className="bg-slate-800/80 rounded-lg p-3 border border-slate-700/60 text-xs sm:text-sm">
+                  <ul className="space-y-1.5 text-slate-300">
+                    <li>
+                      • <strong className="text-white">Contrat réussi :</strong> Vous annoncez <strong className="text-yellow-300">100</strong> et réalisez 140 points ➔ vous marquez <strong className="text-emerald-400">100 points</strong> (vos adversaires marquent <strong className="text-slate-400">0</strong>).
+                    </li>
+                    <li>
+                      • <strong className="text-white">Contrat échoué :</strong> Vous annoncez <strong className="text-yellow-300">100</strong> et faites moins de 100 ➔ les adversaires empochent <strong className="text-emerald-400">100 points</strong> (vous marquez <strong className="text-rose-400">0</strong>).
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Points clés en exergue */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs">
+                  <div className="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/60">
+                    <span className="font-bold text-amber-300 block mb-1">🎯 Enchères stimulées</span>
+                    <p className="text-slate-400 leading-snug">
+                      Puisque les points au-delà du contrat ne sont pas comptabilisés, les équipes sont incitées à monter leurs enchères au plus juste.
+                    </p>
+                  </div>
+                  <div className="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/60">
+                    <span className="font-bold text-indigo-300 block mb-1">🏆 Objectif clair</span>
+                    <p className="text-slate-400 leading-snug">
+                      La partie se dispute le plus souvent en <strong className="text-slate-200">1 000</strong> ou <strong className="text-slate-200">1 500 points</strong>, sans litige ni calcul complexe d&apos;annonces.
+                    </p>
+                  </div>
+                  <div className="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/60">
+                    <span className="font-bold text-emerald-300 block mb-1">👌 Accessible & tactique</span>
+                    <p className="text-slate-400 leading-snug">
+                      Prisée des débutants pour sa clarté immédiate et des experts pour sa pureté stratégique.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="bg-slate-900/70 p-4 rounded-xl border border-slate-700/70 space-y-2">
                 <h3 className="text-base font-bold text-amber-400">
                   2. Contrats
                 </h3>
-                <ul className="list-disc list-inside space-y-1.5 pl-2 text-slate-300">
-                  <li>
-                    <strong className="text-white">Contrats de 80 à 160 :</strong> Saisie normale par paliers de 10, N'oubliez pas les contrats tout atouts (TA) et sans atouts (SA).
-                    Et pour s'amuser, n'hésitez pas à coincher et surcoincher à la volée en tapant du poing sur la table ! (le dé de bois appelé belotin marque le donneur)
+                <ul className="space-y-3 text-slate-300">
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 mt-2 shrink-0 shadow-[0_0_8px_rgba(251,191,36,0.6)]" />
+                    <div className="space-y-1.5 flex-1">
+                      <p>
+                        <strong className="text-white">Contrats standards (82 à 160) :</strong> Enchères annoncées par paliers de 10 points, avec choix de la couleur d&apos;atout ou des variantes <strong className="text-amber-300">Tout Atout (TA)</strong> et <strong className="text-cyan-300">Sans Atout (SA)</strong>.
+                      </p>
+                      {/* Composant joint : Coinche à la volée & Le Belotin */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-xs">
+                        <div className="bg-slate-800/80 p-2.5 rounded-xl border border-slate-700/80 hover:border-slate-600 transition shadow-sm">
+                          <span className="font-bold text-slate-100 flex items-center gap-1.5 mb-1">
+                            <span>⚡</span>
+                            <span>Coinche à la volée</span>
+                          </span>
+                          <p className="text-slate-400 leading-relaxed">
+                            Pour l&apos;ambiance, n&apos;hésitez pas à coincher et surcoincher à la volée en tapant du poing sur la table !
+                          </p>
+                        </div>
+
+                        <div className="bg-slate-800/80 p-2.5 rounded-xl border border-amber-500/30 hover:border-amber-500/50 transition shadow-sm">
+                          <span className="font-bold text-amber-300 flex items-center gap-1.5 mb-1">
+                            <span>🎲</span>
+                            <span>Le Belotin</span>
+                          </span>
+                          <p className="text-slate-400 leading-relaxed">
+                            Le dé en bois (ou cette appli) marque le <strong className="text-white">donneur</strong> à chaque manche.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </li>
-                  <li>
-                    <strong className="text-red-400">Coinché (x2) :</strong> Les points du contrat sont multipliés par 2.
+
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-red-400 mt-2 shrink-0 shadow-[0_0_8px_rgba(248,113,113,0.6)]" />
+                    <div>
+                      <strong className="text-red-400 font-bold">Coinché :</strong> Les points du contrat sont multipliés par 2.
+                    </div>
                   </li>
-                  <li>
-                    <strong className="text-purple-400">Surcoinché (x4) :</strong> Les points du contrat sont multipliés par 4.
+
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-purple-400 mt-2 shrink-0 shadow-[0_0_8px_rgba(192,132,252,0.6)]" />
+                    <div>
+                      <strong className="text-purple-400 font-bold">Surcoinché :</strong> Les points du contrat sont multipliés par 4.
+                    </div>
                   </li>
-                  <li>
-                    <strong className="text-emerald-400">Capot (250 pts) :</strong> Réaliser tous les plis de la manche (8 plis).
+
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 mt-2 shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                    <div>
+                      <strong className="text-emerald-400 font-bold">Capot (250 pts) :</strong> Réaliser tous les plis de la manche (8 plis).
+                    </div>
                   </li>
-                  <li>
-                    <strong className="text-amber-300">Générale (500 pts) :</strong> Un seul joueur réalise tous les plis sans l&apos;aide de son partenaire.
+
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-amber-300 mt-2 shrink-0 shadow-[0_0_8px_rgba(252,211,77,0.6)]" />
+                    <div>
+                      <strong className="text-amber-300 font-bold">Générale (500 pts) :</strong> Un seul joueur réalise tous les plis sans l&apos;aide de son partenaire.
+                    </div>
                   </li>
-                  <li>
-                    <strong className="text-cyan-300">Belote-Rebelote (+20 pts) :</strong> Roi et Dame d&apos;atout en main par le même joueur (à ajouter aux points réalisés).
+
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-cyan-300 mt-2 shrink-0 shadow-[0_0_8px_rgba(103,232,249,0.6)]" />
+                    <div>
+                      <strong className="text-cyan-300 font-bold">Belote-Rebelote (+20 pts) :</strong> Roi et Dame d&apos;atout en main par le même joueur (à ajouter aux points réalisés).
+                    </div>
                   </li>
                 </ul>
               </div>
@@ -267,32 +341,57 @@ export const InfoGuideModal: React.FC<InfoGuideModalProps> = ({
                   className="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl object-cover border-2 border-indigo-400 shadow-2xl flex-shrink-0"
                 />
                 <div className="space-y-3">
-                  <h4 className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-amber-200 animate-pulse tracking-tight">
-                    Développé par ©JuraBrain - tout droit récservé - 2026
+                  <h4 className="text-[16px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-amber-200 tracking-tight">
+                    Développé par Olivier pour ©JuraBrain - Version 1.1 du 06/11/2026
                   </h4>
 
                   <p className="text-xs sm:text-sm text-slate-300 font-medium">
-                    Contact pour suggestion, pourboire...{' '}
                     <a
                       href="mailto:boite151@hotmail.fr"
                       className="text-amber-400 font-bold underline underline-offset-2 hover:text-amber-200 transition-colors cursor-pointer"
                       title="Envoyer un e-mail à boite151@hotmail.fr"
                     >
                       boite151@hotmail.fr
-                    </a>
+                    </a>{' '}
+                    pour suggestion, pourboire...
                   </p>
 
-                  <div className="pt-2">
+                  <div className="pt-2 flex flex-col items-center sm:items-start gap-2.5">
                     <button
                       type="button"
                       onClick={handleShareApp}
-                      className="group relative inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 via-sky-600 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white font-black text-xs sm:text-sm shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all duration-300 transform hover:scale-105 active:scale-95 animate-pulse"
+                      className="relative inline-flex items-center justify-center px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-sky-600 to-emerald-600 hover:from-indigo-500 hover:to-emerald-500 text-white font-black text-xs sm:text-sm shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all duration-300 transform hover:scale-105 active:scale-95"
                       title="Partager l'application sur tous vos réseaux !"
                     >
-                      <span className="text-base group-hover:rotate-12 transition-transform inline-block">📢</span>
                       <span>{shareCopied ? '✓ Lien copié ! Merci du partage !' : "Partager l'appli sur tous vos réseaux !"}</span>
-                      <span className="text-amber-300 animate-bounce">✨</span>
                     </button>
+
+                    <div className="flex items-center gap-2 flex-wrap pt-1 text-xs">
+                      <a
+                        href={`https://api.whatsapp.com/send?text=${encodeURIComponent("Belotin Compteur : compteur de points gratuit pour Belote Coinchée ! https://belote-coinche-score-counter.netlify.app")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-600/40 font-bold transition active:scale-95 flex items-center gap-1 shadow-sm"
+                        title="Partager sur WhatsApp"
+                      >
+                        <span>WhatsApp</span>
+                      </a>
+                      <a
+                        href={`sms:?&body=${encodeURIComponent("Belotin Compteur : compteur de points gratuit pour Belote Coinchée ! https://belote-coinche-score-counter.netlify.app")}`}
+                        className="px-3 py-1.5 rounded-lg bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 border border-cyan-600/40 font-bold transition active:scale-95 flex items-center gap-1 shadow-sm"
+                        title="Partager par SMS"
+                      >
+                        <span>SMS</span>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={handleShareApp}
+                        className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 font-bold transition active:scale-95 flex items-center gap-1 shadow-sm"
+                        title="Copier le lien"
+                      >
+                        <span>{shareCopied ? '✓ Copié !' : 'Copier le lien'}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

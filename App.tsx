@@ -8,6 +8,7 @@ import { SetupGame } from './components/SetupGame';
 import { PlusCircleIcon, ShareIcon } from './components/icons/Icons';
 import { WelcomeModal } from './components/WelcomeModal';
 import { ExitModal } from './components/ExitModal';
+import { ShareModal } from './components/ShareModal';
 import { InfoGuideModal } from './components/InfoGuideModal';
 import { GameHistoryModal } from './components/GameHistoryModal';
 import { playButtonClick, playRoundSuccess, playVictoryCelebration, stopVictoryCelebration } from './utils/audio';
@@ -16,6 +17,8 @@ const App: React.FC = () => {
   const [rounds, setRounds] = useState<Round[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isExitModalOpen, setIsExitModalOpen] = useState<boolean>(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState<boolean>(false);
+  const [isNewGameShare, setIsNewGameShare] = useState<boolean>(false);
   const [launchStep, setLaunchStep] = useState<'belotin' | 'cards' | 'rules' | 'done'>('belotin');
   const [infoModalTab, setInfoModalTab] = useState<'cards' | 'rules' | null>(null);
   const [isBelotinModalOpen, setIsBelotinModalOpen] = useState<boolean>(true);
@@ -235,6 +238,11 @@ const App: React.FC = () => {
     setIsNewGameModalOpen(true);
   };
 
+  const handleOpenShare = () => {
+    setLaunchStep('done');
+    setInfoModalTab('author');
+  };
+
   const handleConfirmResetScores = () => {
     stopVictoryCelebration();
     setRounds([]);
@@ -364,6 +372,7 @@ const App: React.FC = () => {
           onOpenHistory={() => setIsHistoryModalOpen(true)}
           historyCount={gameHistory.length}
           onExit={() => setIsExitModalOpen(true)}
+          onOpenShare={handleOpenShare}
         />
 
         <main>
@@ -391,7 +400,7 @@ const App: React.FC = () => {
                     <button
                       onClick={handleShareVictory}
                       className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl text-xs sm:text-sm shadow-md transition active:scale-95 flex items-center gap-1.5 border border-emerald-400/40"
-                      title="Partager votre score sur les réseaux sociaux"
+                      title="Partager votre score sur vos réseaux"
                     >
                       <ShareIcon className="w-4 h-4" />
                       <span>{victoryShareCopied ? 'Score copié !' : 'Partager le score'}</span>
@@ -445,6 +454,13 @@ const App: React.FC = () => {
       <ExitModal
         isOpen={isExitModalOpen}
         onClose={() => setIsExitModalOpen(false)}
+      />
+
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        isNewGameTransition={isNewGameShare}
+        onConfirmNewGame={() => setIsNewGameModalOpen(true)}
       />
 
       {isNewGameModalOpen && (

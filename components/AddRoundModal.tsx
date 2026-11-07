@@ -176,7 +176,7 @@ export const AddRoundModal: React.FC<AddRoundModalProps> = ({ onClose, onSave, t
                     : 'bg-slate-700/80 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white'
                 }`}
               >
-                RÉUSSI
+                Réussi
               </button>
               <button
                 type="button"

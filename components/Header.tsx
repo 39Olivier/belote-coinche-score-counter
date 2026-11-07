@@ -8,11 +8,12 @@ interface HeaderProps {
     onOpenHistory?: () => void;
     historyCount?: number;
     onExit?: () => void;
+    onOpenShare?: () => void;
 }
 
 const SHARE_URL = 'https://belote-coinche-score-counter.netlify.app';
 
-export const Header: React.FC<HeaderProps> = ({ onNewGame, onOpenInfo, onOpenHistory, historyCount, onExit }) => {
+export const Header: React.FC<HeaderProps> = ({ onNewGame, onOpenInfo, onOpenHistory, historyCount, onExit, onOpenShare }) => {
     const [copied, setCopied] = useState(false);
     const [soundActive, setSoundActive] = useState<boolean>(() => isAudioEnabled());
 
@@ -63,8 +64,8 @@ export const Header: React.FC<HeaderProps> = ({ onNewGame, onOpenInfo, onOpenHis
 
             <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
                 <button
-                    onClick={handleShare}
-                    className="flex items-center px-3 py-2 text-xs sm:text-sm bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 font-bold rounded-lg shadow transition-all active:scale-95 border border-sky-500/40 relative"
+                    onClick={onOpenShare || handleShare}
+                    className="flex items-center px-3.5 py-2 text-xs sm:text-sm bg-gradient-to-r from-sky-500/25 via-blue-500/30 to-sky-500/25 hover:from-sky-500/40 hover:to-blue-500/45 text-sky-200 font-black rounded-lg shadow-md transition-all duration-300 active:scale-95 border border-sky-400/60 shadow-[0_0_16px_rgba(56,189,248,0.45)] ring-1 ring-sky-400/40 animate-pulse hover:scale-105 relative"
                     title="Partager l'application"
                     aria-label="Partager"
                 >
